@@ -1,0 +1,52 @@
+import pandas as pd
+
+# ── Load the data ─────────────────────────────────────────
+print("Loading data...")
+df = pd.read_excel("Ecommerce_Dataset.xlsx", sheet_name="Orders")
+print(f" Loaded {df.shape[0]} rows and {df.shape[1]} columns")
+
+# ── Step 1: Explore ───────────────────────────────────────
+print("\n--- Column Names ---")
+print(df.columns.tolist())
+
+print("\n--- Data Types ---")
+print(df.dtypes)
+
+print("\n--- Missing Values ---")
+print(df.isnull().sum())
+
+print("\n--- Duplicates ---")
+print(f"Duplicate rows: {df.duplicated().sum()}")
+
+# ── Step 2: Fix column names (remove spaces) ──────────────
+df.columns = df.columns.str.strip().str.replace(" ", "_")
+print("\n Columns cleaned:", df.columns.tolist())
+
+# ── Step 3: Fix Date column ───────────────────────────────
+df['Order_Date'] = pd.to_datetime(df['Order_Date'])
+print("\n Date column fixed")
+
+# ── Step 4: Add new useful columns ───────────────────────
+df['Year']          = df['Order_Date'].dt.year
+df['Month_Num']     = df['Order_Date'].dt.month
+df['Month_Name']    = df['Order_Date'].dt.strftime('%b')
+df['Quarter']       = 'Q' + df['Order_Date'].dt.quarter.astype(str)
+df['Profit_Margin'] = (df['Profit'] / df['Revenue'] * 100).round(2)
+df['Is_Returned']   = (df['Order_Status'] == 'Returned').astype(int)
+
+print("New columns added: Year, Month, Quarter, Profit_Margin, Is_Returned")
+
+# ── Step 5: Basic Stats ───────────────────────────────────
+print("\n--- Revenue & Profit Summary ---")
+print(df[['Revenue', 'Cost', 'Profit', 'Profit_Margin']].describe().round(2))
+
+print("\n--- Orders by Category ---")
+print(df.groupby('Category')['Revenue'].sum().sort_values(ascending=False).round(2))
+
+print("\n--- Orders by Region ---")
+print(df.groupby('Region')['Revenue'].sum().sort_values(ascending=False).round(2))
+
+# ── Step 6: Save cleaned file ─────────────────────────────
+df.to_excel("Ecommerce_Cleaned.xlsx", index=False)
+print("\n Saved: Ecommerce_Cleaned.xlsx")
+print("Phase 2 Complete! Ready for Power BI.")
