@@ -1,0 +1,211 @@
+import pandas as pd
+import sqlite3
+
+print("Loading cleaned data...")
+df = pd.read_excel("Ecommerce_Cleaned.xlsx")
+print(f"Loaded {df.shape[0]} rows")
+
+conn = sqlite3.connect("ecommerce.db")
+df.to_sql("orders", conn, if_exists="replace", index=False)
+print("Data loaded into SQL database\n")
+print("=" * 55)
+
+print("\n QUERY 1: Overall Business KPIs")
+print("-" * 55)
+
+q1 = pd.read_sql("""
+    SELECT
+        COUNT(Order_ID)                         AS Total_Orders,
+        COUNT(DISTINCT Customer_ID)             AS Unique_Customers,
+        ROUND(SUM(Revenue), 2)                  AS Total_Revenue,
+        ROUND(SUM(Cost), 2)                     AS Total_Cost,
+        ROUND(SUM(Profit), 2)                   AS Total_Profit,
+        ROUND(AVG(Profit * 100.0 / Revenue), 2) AS Avg_Profit_Margin_Pct,
+        ROUND(AVG(Rating), 2)                   AS Avg_Rating,
+        ROUND(AVG(Delivery_Days), 1)            AS Avg_Delivery_Days
+    FROM orders
+""", conn)
+
+print(q1.to_string(index=False))
+
+print("\n\n QUERY 2: Revenue & Profit by Category")
+print("-" * 55)
+
+q2 = pd.read_sql("""
+    SELECT
+        Category,
+        COUNT(*)                                    AS Total_Orders,
+        ROUND(SUM(Revenue), 2)                      AS Total_Revenue,
+        ROUND(SUM(Profit), 2)                       AS Total_Profit,
+        ROUND(SUM(Profit) * 100.0 / SUM(Revenue), 2) AS Profit_Margin_Pct,
+        ROUND(AVG(Discount) * 100, 2)               AS Avg_Discount_Pct,
+        ROUND(AVG(Rating), 2)                       AS Avg_Rating
+    FROM orders
+    GROUP BY Category
+    ORDER BY Total_Revenue DESC
+""", conn)
+
+print(q2.to_string(index=False))
+
+print("\n\n QUERY 3: Monthly Revenue Trend")
+print("-" * 55)
+
+q3 = pd.read_sql("""
+    SELECT
+        SUBSTR(Order_Date, 1, 7)        AS Month,
+        COUNT(*)                         AS Orders,
+        ROUND(SUM(Revenue), 2)           AS Revenue,
+        ROUND(SUM(Profit), 2)            AS Profit,
+        ROUND(AVG(Rating), 2)            AS Avg_Rating
+    FROM orders
+    GROUP BY Month
+    ORDER BY Month
+""", conn)
+
+print(q3.to_string(index=False))
+
+print("\n\n QUERY 4: Top 10 Best Selling Products")
+print("-" * 55)
+
+q4 = pd.read_sql("""
+    SELECT
+        Product,
+        Category,
+        SUM(Quantity)                AS Units_Sold,
+        ROUND(SUM(Revenue), 2)       AS Total_Revenue,
+        ROUND(SUM(Profit), 2)        AS Total_Profit,
+        ROUND(AVG(Rating), 2)        AS Avg_Rating
+    FROM orders
+    GROUP BY Product, Category
+    ORDER BY Total_Revenue DESC
+    LIMIT 10
+""", conn)
+
+print(q4.to_string(index=False))
+
+print("\n\n QUERY 5: Sales by Region")
+print("-" * 55)
+
+q5 = pd.read_sql("""
+    SELECT
+        Region,
+        COUNT(*)                                     AS Total_Orders,
+        COUNT(DISTINCT Customer_ID)                  AS Unique_Customers,
+        ROUND(SUM(Revenue), 2)                       AS Total_Revenue,
+        ROUND(SUM(Profit), 2)                        AS Total_Profit,
+        ROUND(AVG(Delivery_Days), 1)                 AS Avg_Delivery_Days
+    FROM orders
+    GROUP BY Region
+    ORDER BY Total_Revenue DESC
+""", conn)
+
+print(q5.to_string(index=False))
+
+print("\n\n QUERY 6: Return Rate by Region & Category")
+print("-" * 55)
+q6 = pd.read_sql("""
+    SELECT
+        Region,
+        Category,
+        COUNT(*)                                                        AS Total_Orders,
+        SUM(CASE WHEN Order_Status = 'Returned' THEN 1 ELSE 0 END)     AS Returns,
+        ROUND(
+            SUM(CASE WHEN Order_Status = 'Returned' THEN 1 ELSE 0 END)
+            * 100.0 / COUNT(*), 2
+        )                                                               AS Return_Rate_Pct
+    FROM orders
+    GROUP BY Region, Category
+    ORDER BY Return_Rate_Pct DESC
+    LIMIT 10
+""", conn)
+
+print(q6.to_string(index=False))
+
+print("\n\n QUERY 7: Sales by Channel")
+print("-" * 55)
+
+q7 = pd.read_sql("""
+    SELECT
+        Sales_Channel,
+        COUNT(*)                                      AS Orders,
+        ROUND(SUM(Revenue), 2)                        AS Total_Revenue,
+        ROUND(SUM(Revenue) * 100.0 /
+            SUM(SUM(Revenue)) OVER (), 2)             AS Revenue_Share_Pct,
+        ROUND(AVG(Rating), 2)                         AS Avg_Rating
+    FROM orders
+    GROUP BY Sales_Channel
+    ORDER BY Total_Revenue DESC
+""", conn)
+
+print(q7.to_string(index=False))
+
+print("\n\n QUERY 8: Quarterly Revenue Breakdown")
+print("-" * 55)
+
+q8 = pd.read_sql("""
+    SELECT
+        Quarter,
+        COUNT(*)                   AS Orders,
+        ROUND(SUM(Revenue), 2)     AS Revenue,
+        ROUND(SUM(Profit), 2)      AS Profit,
+        ROUND(AVG(Discount)*100,2) AS Avg_Discount_Pct
+    FROM orders
+    GROUP BY Quarter
+    ORDER BY Quarter
+""", conn)
+
+print(q8.to_string(index=False))
+
+print("\n\n QUERY 9: Payment Method Analysis")
+print("-" * 55)
+
+q9 = pd.read_sql("""
+    SELECT
+        Payment_Method,
+        COUNT(*)                    AS Orders,
+        ROUND(SUM(Revenue), 2)      AS Total_Revenue,
+        ROUND(AVG(Revenue), 2)      AS Avg_Order_Value
+    FROM orders
+    GROUP BY Payment_Method
+    ORDER BY Orders DESC
+""", conn)
+
+print(q9.to_string(index=False))
+
+print("\n\n QUERY 10: Top 10 High Value Customers")
+print("-" * 55)
+
+q10 = pd.read_sql("""
+    SELECT
+        Customer_ID,
+        COUNT(*)                    AS Total_Orders,
+        ROUND(SUM(Revenue), 2)      AS Total_Spent,
+        ROUND(AVG(Revenue), 2)      AS Avg_Order_Value,
+        ROUND(AVG(Rating), 2)       AS Avg_Rating
+    FROM orders
+    GROUP BY Customer_ID
+    ORDER BY Total_Spent DESC
+    LIMIT 10
+""", conn)
+
+print(q10.to_string(index=False))
+
+print("\n\n Saving all query results to SQL_Results.xlsx ...")
+
+with pd.ExcelWriter("SQL_Results.xlsx", engine="openpyxl") as writer:
+    q1.to_excel(writer,  sheet_name="KPIs",             index=False)
+    q2.to_excel(writer,  sheet_name="By_Category",      index=False)
+    q3.to_excel(writer,  sheet_name="Monthly_Trend",    index=False)
+    q4.to_excel(writer,  sheet_name="Top_Products",     index=False)
+    q5.to_excel(writer,  sheet_name="By_Region",        index=False)
+    q6.to_excel(writer,  sheet_name="Return_Rate",      index=False)
+    q7.to_excel(writer,  sheet_name="By_Channel",       index=False)
+    q8.to_excel(writer,  sheet_name="Quarterly",        index=False)
+    q9.to_excel(writer,  sheet_name="Payment_Methods",  index=False)
+    q10.to_excel(writer, sheet_name="Top_Customers",    index=False)
+
+print("Saved: SQL_Results.xlsx")
+print("\n Phase 3 Complete! You have 10 SQL queries done.")
+print("Next: Open Power BI and load Ecommerce_Cleaned.xlsx")
+
+conn.close()
