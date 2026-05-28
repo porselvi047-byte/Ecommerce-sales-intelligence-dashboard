@@ -1,0 +1,26 @@
+import pandas as pd
+
+df = pd.read_excel(r"C:\Users\mdura\Downloads\Ecommerce_Dataset.xlsx", sheet_name="Orders")
+
+print(df.shape)          
+print(df.dtypes)         
+print(df.isnull().sum()) 
+print(df.duplicated().sum()) 
+
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+
+df['Year']         = df['Order Date'].dt.year
+df['Month']        = df['Order Date'].dt.month
+df['Month_Name']   = df['Order Date'].dt.strftime('%b')   
+df['Quarter']      = df['Order Date'].dt.quarter.map({1:'Q1',2:'Q2',3:'Q3',4:'Q4'})
+df['Week']         = df['Order Date'].dt.isocalendar().week
+df['Profit_Margin']= (df['Profit'] / df['Revenue'] * 100).round(2)
+df['Is_Returned']  = (df['Order Status'] == 'Returned').astype(int)
+
+df_clean = df[df['Order Status'] != 'Cancelled'].copy()
+
+print("\n Clean data shape:", df_clean.shape)
+print(df_clean[['Revenue','Profit','Profit_Margin']].describe())
+
+df_clean.to_excel("Ecommerce_Cleaned.xlsx", index=False)
+print(" Saved: Ecommerce_Cleaned.xlsx")
