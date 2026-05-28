@@ -166,9 +166,6 @@ python generate_report.py
  8. Open the dashboard
 
 - **Power BI:** Open `dashboards/ecommerce_dashboard.pbix` in Power BI Desktop
-- **Tableau:** Open `dashboards/ecommerce_dashboard.twbx` in Tableau Desktop
-- **Tableau Public:** [View live dashboard →](https://public.tableau.com/YOUR_LINK_HERE)
-- **Power BI Service:** [View live report →](https://app.powerbi.com/YOUR_LINK_HERE)
 
 📦 Requirements
 
