@@ -27,52 +27,50 @@ A production-grade business intelligence system that tracks *sales performance, 
 
 
 ecommerce-analytics-dashboard/
-│
-├── data/
-│   ├── raw/                    # Original unprocessed dataset
-│   │   └── ecommerce_raw.csv
-│   └── cleaned/                # Cleaned and feature-engineered data
-│       ├── ecommerce_cleaned.csv
-│       └── ecommerce_cleaned.xlsx
-│
-├── notebooks/
-│   ├── 01_data_generation.ipynb       # Synthetic data generation (optional)
-│   ├── 02_eda_and_cleaning.ipynb      # Exploratory analysis & data cleaning
-│   ├── 03_feature_engineering.ipynb   # New feature creation (RFM, cohorts)
-│   └── 04_visualizations.ipynb        # Plotly charts and Python analysis
-│
-├── sql/
-│   ├── schema.sql                     # Star schema DDL (CREATE TABLE statements)
-│   ├── load_data.py                   # Python script to load data into SQLite
-│   └── queries/
-│       ├── 01_monthly_revenue.sql
-│       ├── 02_top_products.sql
-│       ├── 03_revenue_by_region.sql
-│       ├── 04_profit_margin_by_category.sql
-│       ├── 05_customer_order_frequency.sql
-│       ├── 06_cohort_retention.sql
-│       ├── 07_avg_order_value.sql
-│       ├── 08_order_status_breakdown.sql
-│       ├── 09_day_of_week_sales.sql
-│       └── 10_qoq_growth.sql
-│
-├── dashboards/
-│   ├── ecommerce_dashboard.pbix       # Power BI dashboard file
-│   └── ecommerce_dashboard.twbx       # Tableau packaged workbook
-│
-├── reports/
-│   ├── revenue_trend.html             # Interactive Plotly chart
-│   ├── Monthly_BI_Report.xlsx         # Auto-generated Excel report
-│   └── Business_Intelligence_Report.pdf
-│
-├── screenshots/                       # Dashboard screenshots for README
-│
-├── generate_report.py                 # Script to auto-generate Excel report
-├── requirements.txt
-├── .gitignore
-└── README.md
 
-🛠️ Tech Stack
+─ data/   raw/                    
+Original unprocessed dataset
+     ── ecommerce_raw.csv
+     ── cleaned/                Cleaned and feature-engineered data
+     ── ecommerce_cleaned.csv
+     ── ecommerce_cleaned.xlsx
+── notebooks/
+ ── 01_data_generation.ipynb        Synthetic data generation (optional)
+   ── 02_eda_and_cleaning.ipynb      Exploratory analysis & data cleaning
+ ── 03_feature_engineering.ipynb    New feature creation (RFM, cohorts)
+ ── 04_visualizations.ipynb        Plotly charts and Python analysis
+│
+─ sql/
+ ── schema.sql                     Star schema DDL (CREATE TABLE statements)
+  ── load_data.py                   Python script to load data into SQLite
+  └── queries/
+   ── 01_monthly_revenue.sql
+   ── 02_top_products.sql
+   ── 03_revenue_by_region.sql
+      04_profit_margin_by_category.sql
+   ── 05_customer_order_frequency.sql
+   ── 06_cohort_retention.sql
+   ── 07_avg_order_value.sql
+   ── 08_order_status_breakdown.sql
+   ── 09_day_of_week_sales.sql
+   ── 10_qoq_growth.sql
+   ── dashboards/
+   ── ecommerce_dashboard.pbix       Power BI dashboard file
+  └── ecommerce_dashboard.twbx       Tableau packaged workbook
+
+── reports/
+─ revenue_trend.html             Interactive Plotly chart
+  ─ Monthly_BI_Report.xlsx         Auto-generated Excel report
+   Business_Intelligence_Report.pdf
+
+─ screenshots/                       Dashboard screenshots for README
+
+── generate_report.py                  Script to auto-generate Excel report
+── requirements.txt
+── .gitignore
+── README.md
+
+ Tech Stack
 
 | Layer | Tool | Purpose |
 |---|---|---|
